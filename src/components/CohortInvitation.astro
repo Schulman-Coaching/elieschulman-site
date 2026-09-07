@@ -1,0 +1,19 @@
+---
+const { source = 'essay' } = Astro.props;
+const href = `https://www.cohortlearninglabs.org/cohorts?utm_source=elieschulman&utm_medium=website&utm_campaign=october_2026&utm_content=${encodeURIComponent(source)}`;
+---
+<aside class="cohort-invitation" aria-label="Explore this with a group">
+  <p class="section-label">From reading to conversation</p>
+  <h2>Interested in exploring this question with other people?</h2>
+  <p>At Cohort Learning Labs, we examine what happens when our understandings differ, including how we respond to one another in the room.</p>
+  <p class="details">Four weekly 90-minute sessions · 6–8 participants · $500 USD total per person</p>
+  <a href={href}>See the cohort and how to join →</a>
+</aside>
+<style>
+  .cohort-invitation { max-width: 760px; margin: 3rem auto; padding: 2rem; border-top: 2px solid var(--gold, #947542); background: var(--warm-ivory, #f5f0e8); }
+  h2 { font-family: var(--serif); font-size: 1.65rem; line-height: 1.3; margin: .8rem 0; }
+  p { line-height: 1.7; margin-bottom: 1rem; }
+  .details { font-size: .85rem; }
+  a { color: var(--midnight, #0f1b2d); text-decoration: underline; text-underline-offset: .2em; }
+  @media(max-width:640px) { .cohort-invitation { padding: 1.5rem; margin: 2rem 1rem; } }
+</style>

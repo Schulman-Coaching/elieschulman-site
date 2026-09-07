@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import CohortInvitation from '../../components/CohortInvitation.astro';
 import SectionHeader from '../../components/SectionHeader.astro';
 
 export async function getStaticPaths() {
@@ -23,4 +24,5 @@ const { Content } = await render(entry);
   <div class="content">
     <Content />
   </div>
+  <CohortInvitation source={entry.id} />
 </Layout>
