@@ -576,7 +576,7 @@ footer .footer-links {
 }
 
 /* Navigation stays usable without JavaScript; enhancement collapses it on mobile. */
-:focus-visible { outline: 3px solid var(--gold-dim); outline-offset: 4px; }
+:focus-visible:not(#main-content) { outline: 3px solid var(--gold-dim); outline-offset: 4px; }
 [id] { scroll-margin-top: 6rem; }
 .site-nav .nav-links { align-items: center; gap: 1.5rem; }
 .site-nav .nav-links a { min-height: 44px; display: inline-flex; align-items: center; }
