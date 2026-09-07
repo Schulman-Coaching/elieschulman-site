@@ -1,5 +1,12 @@
 ---
 import Layout from './Layout.astro';
+import type { MarkdownHeading } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  frontmatter: CollectionEntry<'teachings'>['data'];
+  headings?: MarkdownHeading[];
+}
 import { generateBookSchema } from '../lib/schema';
 
 const { frontmatter, headings = [] } = Astro.props;
