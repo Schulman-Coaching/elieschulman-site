@@ -52,7 +52,7 @@ const personSchema = generatePersonSchema();
     <span></span><span></span><span></span>
   </button>
   <div class="nav-links" id="site-navigation">
-    <a href="/start-here/">Start here</a>
+    <a href="/start-here/" aria-current={Astro.url.pathname.startsWith('/start-here') ? 'page' : undefined}>Start here</a>
     <a href="/writing/" aria-current={Astro.url.pathname.startsWith('/writing') ? 'page' : undefined}>Essays</a>
     <a href="/weekly-torah/" aria-current={Astro.url.pathname.startsWith('/weekly-torah') ? 'page' : undefined}>Torah</a>
     <a href="/maimonides/" aria-current={Astro.url.pathname.startsWith('/maimonides') ? 'page' : undefined}>Maimonides</a>
