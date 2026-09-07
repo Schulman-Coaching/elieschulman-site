@@ -574,3 +574,28 @@ footer .footer-links {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+/* Navigation stays usable without JavaScript; enhancement collapses it on mobile. */
+:focus-visible { outline: 3px solid var(--gold-dim); outline-offset: 4px; }
+[id] { scroll-margin-top: 6rem; }
+.site-nav .nav-links { align-items: center; gap: 1.5rem; }
+.site-nav .nav-links a { min-height: 44px; display: inline-flex; align-items: center; }
+.site-nav .nav-links a[aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; }
+.hamburger { display: none; }
+@media (max-width: 960px) {
+  nav.site-nav { position: sticky; flex-wrap: wrap; padding: .5rem 1.25rem; }
+  .site-nav .logo { min-height: 44px; display: inline-flex; align-items: center; }
+  .site-nav .nav-links { width: 100%; flex-direction: column; align-items: stretch; gap: 0; padding: .5rem 0; }
+  .site-nav .nav-links a { padding: .5rem .25rem; }
+  .site-nav.nav-ready .nav-links { display: none; }
+  .site-nav.nav-ready .nav-links.active { display: flex; max-height: calc(100dvh - 64px); overflow-y: auto; }
+  .hamburger:not([hidden]) { display: flex; width: 44px; height: 44px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 0; background: transparent; cursor: pointer; }
+  .hamburger span { display: block; width: 22px; height: 2px; background: var(--warm-ivory); }
+  .hamburger.active span:first-child { transform: translateY(7px) rotate(45deg); }
+  .hamburger.active span:nth-child(2) { opacity: 0; }
+  .hamburger.active span:last-child { transform: translateY(-7px) rotate(-45deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

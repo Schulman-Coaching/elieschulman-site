@@ -128,7 +128,8 @@ const ogImage = coverImage
 
     const prefs = JSON.parse(localStorage.getItem(prefsKey) || '{}');
     let fontSize = prefs.fontSize ?? 100;
-    let theme = prefs.theme ?? 'light';
+    type ReaderTheme = 'light' | 'sepia' | 'dark';
+    let theme: ReaderTheme = ['light', 'sepia', 'dark'].includes(prefs.theme) ? prefs.theme : 'light';
 
     const themeSelect = document.getElementById('theme') as HTMLSelectElement;
     themeSelect.value = theme;
@@ -241,7 +242,7 @@ const ogImage = coverImage
 
     document.getElementById('font-up')!.onclick = () => { fontSize = Math.min(200, fontSize + 10); applyPrefs(); };
     document.getElementById('font-down')!.onclick = () => { fontSize = Math.max(60, fontSize - 10); applyPrefs(); };
-    themeSelect.onchange = () => { theme = themeSelect.value; applyPrefs(); };
+    themeSelect.onchange = () => { theme = themeSelect.value as ReaderTheme; applyPrefs(); };
   </script>
 </body>
 </html>

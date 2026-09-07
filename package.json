@@ -13,12 +13,16 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
+    "@xmldom/xmldom": "^0.9.0",
     "astro": "^7.2.0",
     "epubjs": "^0.3.93",
-    "sharp": "^0.35.3",
-    "@xmldom/xmldom": "^0.9.0"
+    "sharp": "^0.35.3"
   },
   "overrides": {
     "@xmldom/xmldom": "^0.9.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
   }
 }

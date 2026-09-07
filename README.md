@@ -141,3 +141,16 @@ src/
 ## Content policy
 
 Ebooks are free with no email capture. The validator rejects lead-capture strings such as “Send Me the Book”.
+
+## September 2026 reading experience
+
+The homepage highlights published, downloadable works from the teachings
+collection and offers direct reader/PDF links. Manuscripts and inquiry branches
+remain distinct from books available now. Navigation exposes Essays, Torah,
+Maimonides, Books, Listen and About directly, including on mobile. The mobile
+menu supports Escape, focus return and navigation without JavaScript.
+
+`@astrojs/check`, TypeScript and `tsconfig.json` are now explicit build inputs;
+`npm run build` performs the declared check without an interactive install.
+Existing audio collection/route warnings are still present and separate from
+this change. The books storefront proposal in PR #18 remains separate.

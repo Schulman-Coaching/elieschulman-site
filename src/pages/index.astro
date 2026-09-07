@@ -2,6 +2,10 @@
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 
+const books = (await getCollection('teachings', ({ data }) => !data.draft && !!(data.text_epub || data.text_pdf)))
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+const featured = books.find(book => book.data.featured) ?? books[0];
+
 const essays = (await getCollection('essays'))
   .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
 ---
@@ -10,33 +14,67 @@ const essays = (await getCollection('essays'))
   title="Elie Schulman — Writer on Language, Judgment, and Learning"
   description="Books, essays, and translations examining how words carry assumptions, how inherited categories guide judgment, and how people learn to see the structures shaping an argument, a relationship, or a group."
 >
-<section class="hero">
-  <div class="hero-inner">
-    <p class="eyebrow">Writer · Educator · Translator</p>
-    <h1 class="display">Making the <em>hidden structure</em> of language, judgment, and learning visible.</h1>
-    <p class="subtitle">
-      Books, essays, and translations that examine how words carry assumptions,
-      how inherited categories guide judgment, and how people learn to see the
-      structures already organizing how they think and act.
-    </p>
-    <a href="/writing/" class="cta">Read the Essays</a>
-    <a href="/books/vocabulary-pov/" class="cta-secondary">Read <em>vocabulary of a particular human's first person point of view</em></a>
+<section class="hero reading-hero">
+  <div class="reading-hero-inner">
+    <div>
+      <p class="eyebrow">Elie Schulman · Writer &amp; Educator</p>
+      <h1 class="display">The words we use shape <em>what we can see.</em></h1>
+      <p class="subtitle">
+        We use the same word and assume we mean the same thing.
+        My writing begins where that assumption breaks down — in a text,
+        a relationship, or a conversation with ourselves.
+      </p>
+      <div class="reading-actions">
+        <a href="#start-reading" class="cta">Find something to read</a>
+        <a href="/about/" class="about-link">About Elie →</a>
+      </div>
+      <p class="reading-note">Essays, Torah, and books on language, judgment, and learning.</p>
+    </div>
+    {featured && (
+      <a class="hero-book" href={`/books/${featured.id}/`}>
+        {featured.data.coverImage && <img src={featured.data.coverImage} alt={`Cover of ${featured.data.title}`} width="240" height="340" fetchpriority="high" />}
+        <span class="hero-book-label">A place to begin</span>
+        <span class="hero-book-title">{featured.data.title}</span>
+        <span class="hero-book-link">Read the book, free →</span>
+      </a>
+    )}
+  </div>
+</section>
+
+<section id="start-reading" class="start-reading">
+  <div class="section-inner">
+    <p class="section-label">Available to read now</p>
+    <h2 class="section-title">Begin with a book.</h2>
+    <p class="section-intro">Read in your browser, or take a copy with you. These books are free, with no email required.</p>
+    <div class="reading-books">
+      {books.map(book => (
+        <article class="reading-book">
+          <p class="book-category">{book.data.section === 'weekly-torah' ? 'Weekly Torah' : 'Language & perception'}</p>
+          <h3><a href={`/books/${book.id}/`}>{book.data.title}</a></h3>
+          <p>{book.data.description}</p>
+          <div class="book-actions">
+            <a href={book.data.text_epub ? `/read/${book.id}/` : `/books/${book.id}/`}>Read online <span aria-hidden="true">→</span></a>
+            {book.data.text_pdf && <a href={book.data.text_pdf} download>Download PDF <span class="sr-only">of {book.data.title}</span></a>}
+          </div>
+        </article>
+      ))}
+    </div>
   </div>
 </section>
 
 <section class="wash-writing">
   <div class="section-inner">
     <p class="section-label">Writing</p>
-    <h2 class="section-title">Essays, in branches</h2>
+    <h2 class="section-title">Follow a question.</h2>
     <p class="section-intro">
-      Seven branches of inquiry — each beginning where a word stopped meaning what we thought it meant.
+      Explore the themes that connect the essays, manuscripts, and work in progress.
     </p>
     <div class="essay-index">
       {essays.map((essay, i) => (
         <a class="essay-row" href={`/writing/${essay.id}/`}>
           <span class="essay-num">{String(i + 1).padStart(2, '0')}</span>
-          <span class="essay-title">{essay.data.title}</span>
-          <span class="essay-arrow">→</span>
+          <span class="essay-copy"><span class="essay-title">{essay.data.title}</span><span class="essay-description">{essay.data.description}</span></span>
+          <span class="essay-arrow" aria-hidden="true">→</span>
         </a>
       ))}
     </div>
@@ -44,54 +82,39 @@ const essays = (await getCollection('essays'))
   </div>
 </section>
 
-<section class="wash-torah">
-  <div class="section-inner">
-    <p class="section-label">Weekly Torah</p>
-    <h2 class="section-title">Parsha commentary</h2>
-    <p class="section-intro">
-      Essays and ebooks on the weekly portion — beginning with Shoftim, available free to read online or download.
-    </p>
-    <div class="featured-grid">
-      <div class="featured-card">
-        <h4>Shoftim</h4>
-        <p class="note">Judges and officers you shall appoint. Read free in your browser or download EPUB/PDF.</p>
-        <p><a class="featured-link" href="/books/shoftim/">Open →</a></p>
-      </div>
-      <div class="featured-card">
-        <h4>Weekly Torah</h4>
-        <p class="note">Browse the parsha collection.</p>
-        <p><a class="featured-link" href="/weekly-torah/">Browse →</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="wash-maimonides">
   <div class="section-inner">
     <p class="section-label">Maimonides Library</p>
-    <h2 class="section-title">One source sequence. Three ways in.</h2>
+    <h2 class="section-title">Maimonides, one question at a time.</h2>
     <p class="section-intro">
-      Books and manuscripts, twenty-two completed ebook volumes on Yesodei HaTorah,
-      and standalone essays — each taking a single question from Maimonides and following it
-      for scholarly, general, and younger readers.
+      An ongoing inquiry into language, knowing, and the words we use for God.
+      Explore the books, the Yesodei HaTorah sequence, and the essays that connect them.
     </p>
     <div class="featured-grid">
       <div class="featured-card">
-        <h4>Books &amp; Manuscripts</h4>
+        <h3>Books &amp; Manuscripts</h3>
         <p class="note">Emes in development; Everything Changes published; Davar in progress</p>
         <p><a class="featured-link" href="/maimonides/books/">View books →</a></p>
       </div>
       <div class="featured-card">
-        <h4>22 Ebook Volumes</h4>
+        <h3>The Foundations Series</h3>
         <p class="note">Yesodei HaTorah 1:1–1:12 and 2:1–2:10</p>
         <p><a class="featured-link" href="/maimonides/foundations/">View volumes →</a></p>
       </div>
       <div class="featured-card">
-        <h4>Standalone Essays</h4>
+        <h3>Standalone Essays</h3>
         <p class="note">Abraham, dialogue, language, attributes</p>
         <p><a class="featured-link" href="/maimonides/essays/">View essays →</a></p>
       </div>
     </div>
+  </div>
+</section>
+<section class="conversation-invitation">
+  <div class="section-inner">
+    <p class="section-label">From reading to conversation</p>
+    <h2 class="section-title">What happens when someone reads it differently?</h2>
+    <p class="section-intro">That question also lives in my work with groups. At Cohort Learning Labs, we explore how we respond to one another when our understandings differ.</p>
+    <a class="work-link" href="https://www.cohortlearninglabs.org/">Explore Cohort Learning Labs →</a>
   </div>
 </section>
 </Layout>
@@ -119,9 +142,47 @@ const essays = (await getCollection('essays'))
     font-family: var(--serif); font-style: italic;
     color: var(--gold-dim); font-size: 1rem; min-width: 2rem;
   }
+  .essay-copy { flex: 1; min-width: 0; }
+  .essay-description { display: block; color: var(--text-secondary); font-size: .9rem; line-height: 1.65; margin-top: .4rem; max-width: 70ch; }
   .essay-title {
     font-family: var(--serif); font-size: 1.4rem; font-weight: 600;
     color: var(--midnight); flex: 1;
   }
   .essay-arrow { color: var(--gold-dim); }
+  .reading-hero { min-height: auto; text-align: left; padding: 9rem 2rem 5rem; }
+  .reading-hero-inner { max-width: 1100px; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 260px; align-items: center; gap: 5rem; }
+  .reading-hero h1.display { font-size: clamp(3rem, 5.7vw, 5.25rem); max-width: 14ch; line-height: 1.04; font-weight: 600; }
+  .reading-hero .subtitle { max-width: 48ch; margin: 1.75rem 0 2rem; }
+  .reading-actions { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+  .about-link { color: var(--warm-ivory); font-size: .9rem; }
+  .reading-note { font-size: .8rem; color: rgba(245,240,232,.75); margin-top: 2rem; }
+  .hero-book { color: var(--warm-ivory); text-decoration: none; display: flex; flex-direction: column; align-items: flex-start; }
+  .hero-book img { width: 210px; height: auto; max-height: 310px; object-fit: contain; object-position: left; box-shadow: 12px 18px 30px rgba(0,0,0,.25); margin-bottom: 2rem; }
+  .hero-book-label { color: var(--gold); text-transform: uppercase; font-size: .7rem; letter-spacing: .14em; }
+  .hero-book-title { font-family: var(--serif); font-size: 1.5rem; line-height: 1.25; margin: .7rem 0; }
+  .hero-book-link { font-size: .8rem; border-bottom: 1px solid var(--gold); padding-bottom: .25rem; }
+  .start-reading .section-label, .conversation-invitation .section-label { color: var(--accent-torah-deep); }
+  .reading-books { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; }
+  .reading-book { border-top: 2px solid var(--midnight); padding-top: 1.5rem; display: flex; flex-direction: column; align-items: flex-start; }
+  .book-category { text-transform: uppercase; letter-spacing: .12em; font-size: .7rem; color: var(--text-secondary); }
+  .reading-book h3 { font-family: var(--serif); font-size: 1.8rem; line-height: 1.2; margin: .75rem 0 1rem; }
+  .reading-book h3 a { text-decoration: none; }
+  .reading-book > p:not(.book-category) { font-size: .95rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .book-actions { margin-top: auto; display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: .875rem; font-weight: 500; }
+  .book-actions a { display: inline-flex; align-items: center; min-height: 44px; }
+  .conversation-invitation { border-top: 1px solid rgba(15,27,45,.15); background: var(--warm-ivory); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  @media (max-width: 960px) {
+    .reading-hero { padding-top: 4rem; }
+    .reading-hero-inner { gap: 2.5rem; grid-template-columns: minmax(0, 1fr) 200px; }
+    .hero-book img { width: 160px; }
+  }
+  @media (max-width: 640px) {
+    .reading-hero { padding: 3rem 1.5rem; }
+    .reading-hero-inner, .reading-books { grid-template-columns: minmax(0, 1fr); }
+    .hero-book { border-top: 1px solid rgba(245,240,232,.25); padding-top: 2rem; }
+    .hero-book img { width: 130px; }
+    .essay-row { gap: .6rem; padding-left: 0; }
+    .essay-title { font-size: 1.25rem; }
+  }
 </style>
