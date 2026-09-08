@@ -1,11 +1,11 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 
-// Verse data fetched from Sefaria API at build time (Deuteronomy 16:18)
-const res = await fetch('https://www.sefaria.org/api/texts/Deuteronomy.16.18?context=0&commentary=0');
-const data = await res.json();
-const heVerse: string = data.he;
-const enVerse: string = (data.text?.[0] ?? '').replace(/<[^>]+>/g, '');
+// Committed source snapshot from Sefaria (Deuteronomy 16:18). Keeping the
+// verse local makes builds reproducible and avoids a deployment dependency on
+// the availability and response shape of a third-party API.
+const heVerse = 'שֹׁפְטִ֣ים וְשֹֽׁטְרִ֗ים תִּֽתֶּן־לְךָ֙ בְּכׇל־שְׁעָרֶ֔יךָ אֲשֶׁ֨ר יְהֹוָ֧ה אֱלֹהֶ֛יךָ נֹתֵ֥ן לְךָ֖ לִשְׁבָטֶ֑יךָ וְשָׁפְט֥וּ אֶת־הָעָ֖ם מִשְׁפַּט־צֶֽדֶק׃';
+const enVerse = 'You shall appoint magistrates and officials for your tribes, in all the settlements that the ETERNAL your God is giving you, and they shall govern the people with due justice.';
 
 // Word-by-word spotlight: the four words the book is built on.
 const focusWords = [

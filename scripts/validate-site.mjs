@@ -28,6 +28,7 @@ function resolveDistRoot() {
 
 const distRoot = resolveDistRoot()
 const failures = []
+const canonicalOrigin = 'https://www.elieschulman.com'
 
 function rel(p) {
   return path.relative(distRoot, p) || '.'
@@ -81,6 +82,30 @@ const sitemapParts = ['sitemap-index.xml', 'sitemap-0.xml']
   .map((f) => readFileSync(f, 'utf8'))
 const sitemap = sitemapParts.join('\n')
 if (!sitemap) failures.push('sitemap XML missing from dist')
+for (const match of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+  if (!match[1].startsWith(`${canonicalOrigin}/`)) {
+    failures.push(`sitemap URL does not use canonical origin: ${match[1]}`)
+  }
+}
+
+const robotsPath = path.join(distRoot, 'robots.txt')
+if (!existsSync(robotsPath)) {
+  failures.push('robots.txt missing from dist')
+} else {
+  const robots = readFileSync(robotsPath, 'utf8')
+  const advertised = robots.match(/^Sitemap:\s*(\S+)$/mi)?.[1]
+  if (!advertised) {
+    failures.push('robots.txt does not advertise a sitemap')
+  } else {
+    const sitemapUrl = new URL(advertised)
+    if (sitemapUrl.origin !== canonicalOrigin) {
+      failures.push(`robots.txt sitemap does not use canonical origin: ${advertised}`)
+    }
+    if (!existsSync(path.join(distRoot, sitemapUrl.pathname.slice(1)))) {
+      failures.push(`robots.txt advertises missing sitemap: ${sitemapUrl.pathname}`)
+    }
+  }
+}
 
 const requiredSnippets = ['<title>', 'name="description"', 'rel="canonical"', '<main', 'Skip to main content']
 
@@ -88,7 +113,6 @@ const htmlByFile = new Map()
 for (const file of htmlFiles) {
   const html = readFileSync(file, 'utf8')
   htmlByFile.set(file, html)
-  const isReader = file.includes(`${path.sep}read${path.sep}`)
   const label = rel(file)
 
   const titleMatch = html.match(/<title>([^<]*)<\/title>/i)
@@ -97,15 +121,22 @@ for (const file of htmlFiles) {
   }
 
   for (const required of requiredSnippets) {
-    if (isReader && (required === '<main' || required === 'Skip to main content' || required === 'rel="canonical"')) continue
     if (!html.includes(required)) failures.push(`${label} is missing ${required}`)
   }
 
   const canonical = html.match(/rel="canonical"\s+href="([^"]+)"/i)?.[1]
-  if (canonical && sitemap && !isReader) {
+  if (canonical && !canonical.startsWith(`${canonicalOrigin}/`)) {
+    failures.push(`${label} canonical does not use ${canonicalOrigin}: ${canonical}`)
+  }
+  if (canonical && sitemap) {
     if (!sitemap.includes(`<loc>${canonical}</loc>`) && !sitemap.includes(`<loc>${canonical.replace(/\/$/, '')}</loc>`)) {
       failures.push(`sitemap is missing ${canonical}`)
     }
+  }
+
+  for (const match of html.matchAll(/\s(?:src|poster)="(\/[^"?#]+)(?:[?#][^"]*)?"/g)) {
+    const assetPath = path.join(distRoot, match[1].slice(1))
+    if (!existsSync(assetPath)) failures.push(`${label} embeds missing ${match[1]}`)
   }
 
   for (const match of html.matchAll(/href="(\/[^"#?]*)(?:#[^"]*)?"/g)) {

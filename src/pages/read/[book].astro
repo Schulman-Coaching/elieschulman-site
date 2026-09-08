@@ -19,9 +19,10 @@ export async function getStaticPaths() {
 
 const { book } = Astro.params;
 const { title, coverImage, epubPath } = Astro.props;
+const canonicalUrl = `https://www.elieschulman.com/read/${book}/`;
 const ogImage = coverImage
-  ? `https://elieschulman.com${coverImage}`
-  : `https://elieschulman.com/books/${book}/cover.png`;
+  ? `https://www.elieschulman.com${coverImage}`
+  : `https://www.elieschulman.com/books/${book}/cover.png`;
 ---
 <!doctype html>
 <html lang="en">
@@ -30,13 +31,16 @@ const ogImage = coverImage
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title} — Reader</title>
   <meta name="description" content={`Read ${title} by Elie Schulman online — free, Kindle-style reading in your browser.`} />
+  <link rel="canonical" href={canonicalUrl} />
   <meta property="og:title" content={`${title} — Elie Schulman`} />
   <meta property="og:description" content={`Read ${title} free online — no app needed. Kindle-style reading in your browser.`} />
   <meta property="og:type" content="book" />
-  <meta property="og:url" content={`https://elieschulman.com/read/${book}/`} />
+  <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={ogImage} />
+  <meta property="og:image:alt" content={`Cover of ${title}`} />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content={ogImage} />
+  <meta name="theme-color" content="#f3efe6" />
   <style>
     :root {
       --bg: #fdfbf7; --fg: #1c1c1c; --chrome: #f3efe6; --accent: #7a5c2e;
@@ -44,6 +48,9 @@ const ogImage = coverImage
     [data-theme="dark"] { --bg: #141414; --fg: #e8e6e3; --chrome: #1f1f1f; --accent: #d3b97c; }
     [data-theme="sepia"] { --bg: #f6f0e3; --fg: #3d3225; --chrome: #efe6d2; --accent: #8a6d3b; }
     * { box-sizing: border-box; }
+    .reader-skip { position: fixed; top: 0; left: 1rem; z-index: 100; padding: .6rem 1rem;
+                   background: var(--fg); color: var(--bg); transform: translateY(-120%); }
+    .reader-skip:focus { transform: translateY(0); }
     body { margin: 0; background: var(--bg); color: var(--fg);
            font-family: Georgia, 'Times New Roman', serif;
            display: flex; flex-direction: column; height: 100dvh;
@@ -79,7 +86,8 @@ const ogImage = coverImage
                  border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
                  color: var(--fg); text-decoration: none; }
     .share-btn:hover { background: color-mix(in srgb, var(--fg) 8%, transparent); }
-    #viewer { flex: 1; min-height: 0; }
+    main { flex: 1; min-height: 0; }
+    #viewer { width: 100%; height: 100%; }
     footer { display: flex; align-items: center; gap: 1rem; padding: .5rem 1rem;
              background: var(--chrome); font-family: system-ui, sans-serif; font-size: .8rem; }
     #progress { flex: 1; height: 4px; background: color-mix(in srgb, var(--fg) 15%, transparent);
@@ -90,9 +98,10 @@ const ogImage = coverImage
   </style>
 </head>
 <body data-book={book} data-epub={epubPath}>
+  <a class="reader-skip" href="#reader-main">Skip to main content</a>
   <header>
     <a href="/books">← Library</a>
-    <button id="toc-btn" title="Table of contents">☰</button>
+    <button id="toc-btn" title="Table of contents" aria-label="Open table of contents" aria-expanded="false" aria-controls="toc-drawer">☰</button>
     <h1>{title}</h1>
     <div class="controls">
       <a id="wa-share" class="share-btn" title="Share via WhatsApp" target="_blank" rel="noopener">Share</a>
@@ -106,16 +115,18 @@ const ogImage = coverImage
     </div>
   </header>
 
-  <div id="viewer"></div>
+  <main id="reader-main" tabindex="-1">
+    <div id="viewer"></div>
+  </main>
   <div id="prev-zone" class="navzone" title="Previous page"></div>
   <div id="next-zone" class="navzone" title="Next page"></div>
   <div id="toc-scrim"></div>
-  <nav id="toc-drawer" aria-label="Table of contents"><h2>Contents</h2></nav>
+  <nav id="toc-drawer" aria-label="Table of contents" aria-hidden="true" tabindex="-1" inert><h2>Contents</h2></nav>
 
   <footer>
     <button id="prev">‹ Prev</button>
     <div id="progress"><div></div></div>
-    <span id="loc"></span>
+    <span id="loc" aria-live="polite"></span>
     <button id="next">Next ›</button>
   </footer>
 
@@ -126,10 +137,28 @@ const ogImage = coverImage
     const storeKey = `reader:${bookSlug}`;
     const prefsKey = `reader:prefs`;
 
-    const prefs = JSON.parse(localStorage.getItem(prefsKey) || '{}');
-    let fontSize = prefs.fontSize ?? 100;
+    function readStoredJson<T>(key: string, fallback: T): T {
+      try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function writeStoredJson(key: string, value: unknown) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch {
+        // Reading still works when storage is unavailable or full.
+      }
+    }
+
+    const prefs = readStoredJson<Record<string, unknown>>(prefsKey, {});
+    let fontSize = typeof prefs.fontSize === 'number' ? prefs.fontSize : 100;
     type ReaderTheme = 'light' | 'sepia' | 'dark';
-    let theme: ReaderTheme = ['light', 'sepia', 'dark'].includes(prefs.theme) ? prefs.theme : 'light';
+    const storedTheme = typeof prefs.theme === 'string' ? prefs.theme : '';
+    let theme: ReaderTheme = ['light', 'sepia', 'dark'].includes(storedTheme) ? storedTheme as ReaderTheme : 'light';
 
     const themeSelect = document.getElementById('theme') as HTMLSelectElement;
     themeSelect.value = theme;
@@ -151,16 +180,16 @@ const ogImage = coverImage
       rendition.themes.override('color', colors.fg);
       rendition.themes.override('background', colors.bg);
       document.documentElement.dataset.theme = theme;
-      localStorage.setItem(prefsKey, JSON.stringify({ fontSize, theme }));
+      writeStoredJson(prefsKey, { fontSize, theme });
     }
     applyPrefs();
 
     // Restore last reading position
-    const saved = JSON.parse(localStorage.getItem(storeKey) || 'null');
+    const saved = readStoredJson<{ cfi?: string } | null>(storeKey, null);
     rendition.display(saved?.cfi || undefined);
 
     rendition.on('relocated', (loc: any) => {
-      localStorage.setItem(storeKey, JSON.stringify({ cfi: loc.start.cfi }));
+      writeStoredJson(storeKey, { cfi: loc.start.cfi });
       const pct = loc.start.percentage ? Math.round(loc.start.percentage * 100) : 0;
       (document.querySelector('#progress > div') as HTMLElement).style.width = pct + '%';
       document.getElementById('loc')!.textContent = pct + '%';
@@ -175,19 +204,34 @@ const ogImage = coverImage
 
     // ── WhatsApp share ─────────────────────────────────────────────
     const title = document.querySelector('h1')!.textContent;
-    const shareUrl = `https://elieschulman.com/read/${bookSlug}/`;
+    const shareUrl = `https://www.elieschulman.com/read/${bookSlug}/`;
     document.getElementById('wa-share')!.setAttribute('href',
       `https://wa.me/?text=${encodeURIComponent(`Reading "${title}" by Elie Schulman — free online:\n${shareUrl}`)}`);
 
     // ── Table of contents drawer ───────────────────────────────────
     const drawer = document.getElementById('toc-drawer')!;
     const scrim = document.getElementById('toc-scrim')!;
-    const closeToc = () => { drawer.classList.remove('open'); scrim.classList.remove('show'); };
-    document.getElementById('toc-btn')!.onclick = () => {
-      drawer.classList.toggle('open');
-      scrim.classList.toggle('show');
+    const tocButton = document.getElementById('toc-btn')!;
+    const closeToc = (restoreFocus = false) => {
+      drawer.classList.remove('open');
+      scrim.classList.remove('show');
+      drawer.setAttribute('aria-hidden', 'true');
+      drawer.inert = true;
+      tocButton.setAttribute('aria-expanded', 'false');
+      tocButton.setAttribute('aria-label', 'Open table of contents');
+      if (restoreFocus) tocButton.focus();
     };
-    scrim.onclick = closeToc;
+    const openToc = () => {
+      drawer.classList.add('open');
+      scrim.classList.add('show');
+      drawer.setAttribute('aria-hidden', 'false');
+      drawer.inert = false;
+      tocButton.setAttribute('aria-expanded', 'true');
+      tocButton.setAttribute('aria-label', 'Close table of contents');
+      (drawer.querySelector('a') || drawer).focus();
+    };
+    tocButton.onclick = () => drawer.classList.contains('open') ? closeToc(true) : openToc();
+    scrim.onclick = () => closeToc(true);
 
     book.loaded.navigation.then((nav: any) => {
       nav.toc.forEach((item: any) => {
@@ -197,6 +241,10 @@ const ogImage = coverImage
         a.onclick = (e) => { e.preventDefault(); rendition.display(item.href); closeToc(); };
         drawer.appendChild(a);
       });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && drawer.classList.contains('open')) closeToc(true);
     });
 
     // ── Auto-hiding chrome (tap center to toggle) ──────────────────

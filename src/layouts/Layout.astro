@@ -10,7 +10,7 @@ export interface Props {
 }
 
 const { title, description, ogImage = '/og-image.svg', schema } = Astro.props;
-const siteUrl = Astro.site || 'https://elieschulman.com';
+const siteUrl = Astro.site || 'https://www.elieschulman.com';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
 const ogImageUrl = new URL(ogImage, siteUrl).href;
 const personSchema = generatePersonSchema();

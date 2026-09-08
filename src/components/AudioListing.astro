@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  kind: 'podcasts' | 'lectures' | 'interviews';
+}
+
+const { kind } = Astro.props;
+const items = (await getCollection('audio', ({ data }) => data.kind === kind && !data.draft))
+  .sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0));
+---
+
+{items.length === 0 ? (
+  <div class="resource-card">
+    <h2>Coming soon</h2>
+    <p>No {kind} published yet. New recordings will appear here automatically.</p>
+  </div>
+) : (
+  items.map((item) => (
+    <article class="resource-card">
+      {item.data.date && <p class="eyebrow">{item.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>}
+      <h2>{item.data.url ? <a href={item.data.url}>{item.data.title}</a> : item.data.title}</h2>
+      <p>{item.data.description}</p>
+      {item.data.audio_file && <audio controls preload="none" src={item.data.audio_file}></audio>}
+    </article>
+  ))
+)}
+
+<style>
+  audio { width: 100%; }
+</style>
