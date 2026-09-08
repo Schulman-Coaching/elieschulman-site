@@ -1,5 +1,6 @@
-import { z, defineCollection } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const teachingSection = z.enum([
   'ebook',
@@ -69,6 +70,7 @@ const audio = defineCollection({
     date: z.coerce.date().optional(),
     url: z.string().optional(),
     audio_file: z.string().optional(),
+    draft: z.boolean().default(false),
   }),
 });
 

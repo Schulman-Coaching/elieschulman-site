@@ -1,6 +1,6 @@
 # elieschulman-site
 
-Personal static site for **Elie Schulman** — essays, weekly Torah teachings, Maimonides library pages, free eBooks, and an in-browser EPUB reader. Live at [elieschulman.com](https://elieschulman.com).
+Personal static site for **Elie Schulman** — essays, weekly Torah teachings, Maimonides library pages, free eBooks, and an in-browser EPUB reader. Live at [www.elieschulman.com](https://www.elieschulman.com).
 
 ## Stack
 

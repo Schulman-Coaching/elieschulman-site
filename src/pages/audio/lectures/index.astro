@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AudioListing from '../../../components/AudioListing.astro';
 ---
 
 <Layout title="Lectures — Elie Schulman" description="Recorded lectures on language, judgment, and group process.">
@@ -11,9 +12,6 @@ import Layout from '../../../layouts/Layout.astro';
     </div>
   </header>
   <div class="content">
-    <div style="background: rgba(201,168,76,0.1); padding: 2rem; border-radius: 8px; border-left: 4px solid #c9a84c; text-align: center; max-width: 600px; margin: 3rem auto;">
-      <h2 style="font-family: var(--serif); font-size: 1.5rem; margin-bottom: 1rem;">Coming Soon</h2>
-      <p>Recorded lectures will be added here soon. In the meantime, explore Elie's written work on these topics in the <a href="/writing/">Essays section</a> or reach out via <a href="mailto:elie@cohortlearninglabs.org">email</a>.</p>
-    </div>
+    <AudioListing kind="lectures" />
   </div>
 </Layout>

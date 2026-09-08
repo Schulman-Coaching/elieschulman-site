@@ -13,7 +13,7 @@ export function generatePersonSchema(): string {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: 'Elie Schulman',
-    url: 'https://elieschulman.com',
+    url: 'https://www.elieschulman.com',
     sameAs: [
       'https://emesnewsletter.substack.com',
       'https://www.cohortlearninglabs.org/'
@@ -34,12 +34,12 @@ export function generateArticleSchema(title: string, description: string, datePu
     author: {
       '@type': 'Person',
       name: 'Elie Schulman',
-      url: 'https://elieschulman.com'
+      url: 'https://www.elieschulman.com'
     },
     publisher: {
       '@type': 'Organization',
       name: 'Elie Schulman',
-      url: 'https://elieschulman.com'
+      url: 'https://www.elieschulman.com'
     },
     ...(datePublished && { datePublished }),
     ...(dateModified && { dateModified })
@@ -56,12 +56,12 @@ export function generateBookSchema(title: string, description: string, coverImag
     author: {
       '@type': 'Person',
       name: 'Elie Schulman',
-      url: 'https://elieschulman.com'
+      url: 'https://www.elieschulman.com'
     },
     publisher: {
       '@type': 'Organization',
       name: 'Elie Schulman',
-      url: 'https://elieschulman.com'
+      url: 'https://www.elieschulman.com'
     },
     ...(coverImage && { image: coverImage })
   };
