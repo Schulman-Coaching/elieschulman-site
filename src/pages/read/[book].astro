@@ -238,7 +238,12 @@ const ogImage = coverImage
         const a = document.createElement('a');
         a.textContent = item.label.trim();
         a.href = '#';
-        a.onclick = (e) => { e.preventDefault(); rendition.display(item.href); closeToc(); };
+        a.onclick = (e) => {
+          e.preventDefault();
+          rendition.display(item.href);
+          document.getElementById('reader-main')!.focus();
+          closeToc();
+        };
         drawer.appendChild(a);
       });
     });
